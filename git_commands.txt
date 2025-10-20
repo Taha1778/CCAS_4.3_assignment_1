@@ -4,3 +4,4 @@ git commit -m 'Commit message': Commits changes to the repository with a message
 git push origin <branch name>: Pushes changes to the remote repository.
 git pull origin <branch name>: Pulls changes from the remote repository.
 This line was added in version_1 branch.
+This line was added in version_1 branch.
