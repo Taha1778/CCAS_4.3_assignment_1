@@ -1,0 +1,173 @@
+CREATE TABLE Airline (
+    Airline_ID INT PRIMARY KEY,
+    Airline_Name VARCHAR(100)
+);
+
+CREATE TABLE Airplane_Type (
+    Type_ID INT PRIMARY KEY,
+    Airplane_Type_Name VARCHAR(50),
+    Max_Seats INT
+);
+
+CREATE TABLE Airport (
+    Airport_ID INT PRIMARY KEY,
+    Airport_Name VARCHAR(100)
+);
+
+CREATE TABLE Flight (
+    Flight_Number INT PRIMARY KEY,
+    Airline_ID INT,
+    FOREIGN KEY (Airline_ID) REFERENCES Airline(Airline_ID)
+);
+
+CREATE TABLE FLIGHT_LEG (
+    LEG_ID            NUMBER PRIMARY KEY,
+    FLIGHT_NUMBER     NUMBER,
+    DEPARTURE_AIRPORT_ID NUMBER,
+    ARRIVAL_AIRPORT_ID   NUMBER,
+    SCHEDULED_DEPARTURE_TIME VARCHAR2(10),
+    SCHEDULED_ARRIVAL_TIME   VARCHAR2(10),
+    WEEKDAY          VARCHAR2(20),
+    TYPE_ID          NUMBER,
+    FOREIGN KEY (FLIGHT_NUMBER) REFERENCES FLIGHT(FLIGHT_NUMBER),
+    FOREIGN KEY (DEPARTURE_AIRPORT_ID) REFERENCES AIRPORT(AIRPORT_ID),
+    FOREIGN KEY (ARRIVAL_AIRPORT_ID) REFERENCES AIRPORT(AIRPORT_ID),
+    FOREIGN KEY (TYPE_ID) REFERENCES AIRPLANE_TYPE(TYPE_ID)
+);
+
+
+CREATE TABLE Fare (
+    Fare_ID INT PRIMARY KEY,
+    Flight_Number INT,
+    Restrictions VARCHAR(100),
+    Amount DECIMAL(10,2),
+    FOREIGN KEY (Flight_Number) REFERENCES Flight(Flight_Number)
+);
+
+CREATE TABLE Seat_Reservation (
+    Reservation_ID INT PRIMARY KEY,
+    Flight_Number INT,
+    Seat_Number VARCHAR(10),
+    Passenger_Name VARCHAR(100),
+    FOREIGN KEY (Flight_Number) REFERENCES Flight(Flight_Number)
+);
+
+
+INSERT INTO Airline VALUES
+(1, 'EgyptAir'),
+(2, 'Nile Air'),
+(3, 'Air Cairo');
+
+INSERT INTO Airplane_Type VALUES
+(1, 'A320', 180),
+(2, 'EJET', 90),
+(3, 'BOEING737', 160);
+
+INSERT INTO Airport VALUES
+(100, 'Cairo International'),
+(200, 'Alexandria Borg El Arab'),
+(300, 'Hurghada Airport');
+
+INSERT INTO Flight VALUES
+(101, 1),
+(202, 2),
+(303, 3);
+
+INSERT INTO Flight_Leg VALUES
+(1, 101, 100, 200, '08:00', '09:00', 'Monday', 1),
+(2, 202, 200, 300, '10:00', '12:00', 'Monday', 2),
+(3, 303, 300, 100, '14:00', '15:30', 'Sunday', 3);
+
+INSERT INTO Fare VALUES
+(1, 101, 'No refund', 60),
+(2, 202, 'Child fare', 40),
+(3, 303, 'Business', 120);
+
+INSERT INTO Seat_Reservation VALUES
+(1, 101, '12A', 'Ahmed Ali'),
+(2, 101, '14B', 'Sara Mohamed'),
+(3, 202, '22C', 'Omar Samir'),
+(4, 303, '3D', 'Lina Adel'),
+(5, 303, '4A', 'Mostafa Eid');
+
+------------------------------------------------
+-- a)
+------------------------------------------------
+SELECT A.Airline_Name,
+       F.Flight_Number
+FROM Flight F
+JOIN Airline A
+    ON F.Airline_ID = A.Airline_ID
+ORDER BY A.Airline_Name ASC;
+
+
+------------------------------------------------
+-- b)
+------------------------------------------------
+SELECT Restrictions,
+       Amount * 1.15 AS AmountAfter_Tax
+FROM Fare
+WHERE Amount > 50;
+
+
+------------------------------------------------
+-- c)
+------------------------------------------------
+Delete from SEAT_RESERVATION
+Limit(Select Count(*) * 0.05 from SEAT_RESERVATION);
+
+------------------------------------------------
+-- d)
+------------------------------------------------
+Select Airplane_Type_name, Max_Seats
+From Airplane_Type;
+
+------------------------------------------------
+-- e)
+------------------------------------------------
+Select Airplane_Type_name
+From Airplane_Type
+Where Airplane_Type_name like 'E%T';
+
+------------------------------------------------
+-- f)
+------------------------------------------------
+SELECT F.Flight_Number,
+       A1.Airport_Name AS Departure_Airport,
+       A2.Airport_Name AS Arrival_Airport,
+       FL.Scheduled_Departure_Time,
+       FL.Scheduled_Arrival_Time,
+       AT.Airplane_Type_Name
+FROM Flight F
+JOIN Flight_Leg FL
+     ON F.Flight_Number = FL.Flight_Number
+JOIN Airport A1
+     ON FL.Departure_Airport_ID = A1.Airport_ID
+JOIN Airport A2
+     ON FL.Arrival_Airport_ID = A2.Airport_ID
+JOIN Airplane_Type AT
+     ON FL.Type_ID = AT.Type_ID
+WHERE FL.Weekday = 'Monday';
+
+SELECT table_name FROM user_tables;
+
+------------------------------------------------
+-- j)
+------------------------------------------------
+SELECT F.Flight_Number,
+       A.Airline_Name,
+       AP1.Airport_Name AS Departure_Airport,
+       AP2.Airport_Name AS Arrival_Airport,
+       FL.Scheduled_Departure_Time,
+       FL.Scheduled_Arrival_Time
+FROM FLIGHT F
+JOIN AIRLINE A
+     ON F.AIRLINE_ID = A.AIRLINE_ID
+JOIN FLIGHT_LEG FL
+     ON F.Flight_Number = FL.Flight_Number
+JOIN AIRPORT AP1
+     ON FL.Departure_Airport_ID = AP1.Airport_ID
+JOIN AIRPORT AP2
+     ON FL.Arrival_Airport_ID = AP2.Airport_ID
+WHERE A.Airline_Name LIKE '%Air%';
+
